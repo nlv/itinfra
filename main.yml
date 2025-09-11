@@ -1,6 +1,8 @@
 ---
 - name: Set hostname for all hosts
   import_playbook: ./all/playbooks/set_hostname.yml
-- name: Install nginx
+- name: Install nginx 
   import_playbook: ./all/playbooks/nginx.yml
+- name: Install certbot
+  import_playbook: ./all/playbooks/certbot.yml
 

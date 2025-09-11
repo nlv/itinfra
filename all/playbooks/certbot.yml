@@ -1,0 +1,10 @@
+---
+- 
+  name: Install Certbot
+  hosts: certbot
+  tasks:
+    - name: "Install certbot"
+      apt:
+        name: certbot
+        state: present
+ 
