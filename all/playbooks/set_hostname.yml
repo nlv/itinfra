@@ -1,0 +1,12 @@
+---
+- name: "Set hostname"
+  hosts: all
+
+  tasks:
+    - name: Set hostname
+      template:
+        src: ../files/hostname.j2
+        dest: /etc/hostname
+        owner: root
+        group: root
+        mode: '0644'

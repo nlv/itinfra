@@ -1,0 +1,4 @@
+---
+- name: Set hostname for all hosts
+  import_playbook: ./all/playbooks/set_hostname.yml
+
