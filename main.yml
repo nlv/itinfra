@@ -3,6 +3,11 @@
   import_playbook: ./all/playbooks/set_hostname.yml
 - name: Install nginx 
   import_playbook: ./all/playbooks/nginx.yml
-- name: Install certbot
-  import_playbook: ./all/playbooks/certbot.yml
+
+- name: Setup rssbridge nginx config
+  import_playbook: ./all/playbooks/rssbridge_docker.yml
+
+- name: Install nginx certbot
+  import_playbook: ./all/playbooks/nginx_certbot.yml
+
 

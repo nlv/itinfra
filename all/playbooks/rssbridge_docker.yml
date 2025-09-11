@@ -1,0 +1,18 @@
+---
+-
+  name: "Install rssbridge dockered app"
+  hosts: rssbridge_docker
+  tasks:
+    - name: "Add default nginx configurtion"
+      template:
+        src: ../files/nginx_rssbridge_docker.j2
+        dest: /etc/nginx/sites-available/rssbridge
+    - name: "Enable default"
+      file:
+        src: /etc/nginx/sites-available/rssbridge
+        dest: /etc/nginx/sites-enabled/rssbridge
+        state: link
+    - name: "Load vhost for default"
+      service:
+        name: nginx
+        state: reloaded

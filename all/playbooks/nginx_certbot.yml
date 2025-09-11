@@ -1,0 +1,17 @@
+---
+- 
+  name: Install nginx Certbot
+  hosts: nginx_certbot
+  tasks:
+    - name: "Install certbot"
+      apt:
+        name: certbot
+        state: present
+    - name: "Install certbot nginx plugin"
+      apt:
+        name: python3-certbot-nginx
+        state: present
+    - name: "Add options-ssl-nginx.conf to nginx config"
+      copy:
+        src: ../files/options-ssl-nginx.conf
+        dest: /etc/letsencrypt/options-ssl-nginx.conf 
