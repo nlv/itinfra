@@ -15,3 +15,5 @@
       copy:
         src: ../files/options-ssl-nginx.conf
         dest: /etc/letsencrypt/options-ssl-nginx.conf 
+    - name: "Run certbot standalone"
+      command: '/usr/bin/certbot -n --agree-tos --email {{ cert_admin_email }} run --nginx --domains {{ ssl_domains_list }}'
