@@ -16,3 +16,15 @@
       service:
         name: nginx
         state: reloaded
+
+    - name: Установка docker.io
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+    - name: Create RSS Bridge Docker container
+      community.docker.docker_container:
+        name: rss-bridge
+        image: rssbridge/rss-bridge
+        state: started
+        published_ports:
+          - "3000:80"
