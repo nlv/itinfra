@@ -1,4 +1,6 @@
 ---
 - name: Set hostname for all hosts
   import_playbook: ./all/playbooks/set_hostname.yml
+- name: Install nginx
+  import_playbook: ./all/playbooks/nginx.yml
 
