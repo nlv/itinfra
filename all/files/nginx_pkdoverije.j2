@@ -1,0 +1,14 @@
+server {
+    server_name pkdoverije.{{ inventory_hostname }};
+
+    root /var/www/pkdoverije; 
+    index index.html; 
+
+    location /.well-known {
+          root /var/www/html;
+    }
+
+    location / {  
+        try_files $uri $uri/ =404;  
+    }  
+}

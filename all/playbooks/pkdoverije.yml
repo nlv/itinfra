@@ -1,0 +1,32 @@
+---
+-
+  name: "Install rssbridge dockered app"
+  hosts: pkdoverije
+  tasks:
+    - name: "Установка папки сайта"
+      file:
+        path: /var/www/pkdoverije
+        state: directory
+        owner: www-data
+        group: www-data
+    - name: Установка тестового файла
+      copy:
+        src: ../files/pkdoverije_test.html
+        dest: /var/www/pkdoverije/index.html
+        owner: www-data
+        group: www-data
+
+    - name: "Add default nginx configurtion"
+      template:
+        src: ../files/nginx_pkdoverije.j2
+        dest: /etc/nginx/sites-available/pkdoverije
+    - name: "Enable default"
+      file:
+        src: /etc/nginx/sites-available/pkdoverije
+        dest: /etc/nginx/sites-enabled/pkdoverije
+        state: link
+    - name: "Load vhost for default"
+      service:
+        name: nginx
+        state: reloaded
+

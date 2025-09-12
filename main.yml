@@ -7,6 +7,9 @@
 - name: Setup rssbridge nginx config
   import_playbook: ./all/playbooks/rssbridge_docker.yml
 
+- name: Setup pkdoverije nginx config
+  import_playbook: ./all/playbooks/pkdoverije.yml
+
 - name: Install nginx certbot
   import_playbook: ./all/playbooks/nginx_certbot.yml
 
