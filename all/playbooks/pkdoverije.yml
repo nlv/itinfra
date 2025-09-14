@@ -1,20 +1,22 @@
 ---
 -
-  name: "Install rssbridge dockered app"
+  name: "Install pkdoverije dockered app"
   hosts: pkdoverije
   tasks:
     - name: "Установка папки сайта"
       file:
         path: /var/www/pkdoverije
-        state: directory
+        state: absent
         owner: www-data
         group: www-data
-    - name: Установка тестового файла
-      copy:
-        src: ../files/pkdoverije_test.html
-        dest: /var/www/pkdoverije/index.html
-        owner: www-data
-        group: www-data
+    - name: Get latest Application Codebase
+      git:
+        repo: git@github.com:nlv/nlv.github.io.git
+        version: main 
+        dest: /var/www/pkdoverije
+        single_branch: yes
+        accept_hostkey: true
+        depth: 1
 
     - name: "Add default nginx configurtion"
       template:
