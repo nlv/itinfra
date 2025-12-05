@@ -10,6 +10,9 @@
 - name: Setup pkdoverije nginx config
   import_playbook: ./all/playbooks/pkdoverije.yml
 
+- name: Install xwiki
+  import_playbook: ./all/playbooks/xwiki.yml
+
 - name: Install nginx certbot
   import_playbook: ./all/playbooks/nginx_certbot.yml
 
