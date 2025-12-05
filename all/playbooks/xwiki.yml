@@ -1,0 +1,45 @@
+---
+- name: Установка XWiki с MariaDB на Ubuntu
+  hosts: all
+  become: yes
+  vars:
+    xwiki_distr: "xwiki-tomcat10-mariadb"
+    
+  tasks:
+    - name: apt update
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Добавить GPG ключ xwiki-keyring
+      apt_key:
+        url: https://maven.xwiki.org/xwiki-keyring.gpg
+        state: present
+
+    - name: Добавить XWiki репозиторий
+      apt_repository:
+        repo: "deb  http://maven.xwiki.org stable/"
+        state: present
+        filename: xwiki-stable
+      notify: apt update
+
+    - name: Установить xwiki {{ xwiki_distr }}
+      apt:
+        name: "{{ xwiki_distr }}"
+        state: present
+
+    - name: "Add default nginx configurtion"
+      template:
+        src: ../files/nginx_xwiki.j2
+        dest: /etc/nginx/sites-available/xwiki
+
+    - name: "Enable default"
+      file:
+        src: /etc/nginx/sites-available/xwiki
+        dest: /etc/nginx/sites-enabled/xwiki
+        state: link
+
+    - name: "Reload nginx config"
+      service:
+        name: nginx
+        state: reloaded
