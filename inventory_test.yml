@@ -1,0 +1,16 @@
+db:
+  hosts:
+    nlvomsk.ru:
+      ansible_user: root
+
+solr:
+  hosts:
+    nlvomsk.ru:
+      ansible_user: root
+      solr_heap: "2g"
+
+xwiki:
+  hosts:
+    nlvomsk.ru:
+      ansible_user: root
+

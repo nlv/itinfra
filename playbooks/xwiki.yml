@@ -1,0 +1,139 @@
+---
+- name: Установка MariaDB
+  hosts: db
+  become: yes
+  tags: db
+  vars:
+  roles: 
+    - role: geerlingguy.mysql
+      become: true
+      overwrite_global_mycnf: false
+      mysql_databases:
+        - name: xwiki
+      mysql_users:
+        - name: xwiki
+          password: xwiki
+          priv: "xwiki.*:ALL"
+      mysql_packages:
+        - mariadb-client
+        - mariadb-server
+      mysql_daemon: mariadb
+
+- name: Установка Solr
+  hosts: solr
+  tags: solr
+  become: yes
+  roles:
+    - role: solr
+      solr_version: "9.10.0"
+      solr_port: 8983
+      xwiki_solr_packages:
+        - xwiki-solr9-all 
+      
+
+- name: Установка xwiki
+  hosts: xwiki
+  tags: xwiki
+  become: yes
+  vars:
+    xwiki_domain: "xwiki.{{ inventory_hostname }}"
+    xwiki_port: "8080"
+
+  pre_tasks:
+  - name: Установить hostname сервера
+    hostname:
+      name: "{{ inventory_hostname }}"
+    notify: update hosts file
+
+  roles:
+    - role: xwiki
+      xwiki_mariadb_host: "{{ hostvars[groups.db[0]].inventory_hostname }}"
+      xwiki_solr_host: "{{ hostvars[groups.solr[0]].inventory_hostname }}"
+
+  handlers:
+    - name: update hosts file
+      service:
+        name: systemd-networkd
+        state: restarted
+
+- name: Установка certbot
+  hosts: xwiki
+  tags: certbot
+  become: yes
+  vars:
+    xwiki_domain: "xwiki.{{ inventory_hostname }}"
+
+  pre_tasks:
+    - name: Собрать факты о пакетах
+      package_facts:
+        manager: auto
+    - name: Собрать факты о сервисах
+      service_facts:
+    - name: Установить certbot метод на основе nginx
+      set_fact:
+        create_method: "{{ 'webroot' if (nginx_package is defined and nginx_package | length > 0 and nginx_service is defined and nginx_service.state == 'running') else 'standalone' }}"
+      vars:
+        nginx_package: "{{ ansible_facts.packages['nginx'] if ansible_facts.packages is defined and 'nginx' in ansible_facts.packages else [] }}"
+        nginx_service: "{{ ansible_facts.services['nginx.service'] if ansible_facts.services is defined and 'nginx.service' in ansible_facts.services else {} }}"
+
+    - name: Показать выбранный метод
+      debug:
+        msg: "create_method = {{ create_method }}"
+
+
+  roles:
+      - role: geerlingguy.certbot
+        certbot_install_method: package
+        certbot_create_if_missing: true
+        certbot_create_method: "{{ create_method }}"
+        certbot_certs:
+          - domains:
+              - "{{ xwiki_domain }}"
+            email: "Leon.V.Nikitin@pravmail.ru"
+
+
+- name: Установка nginx
+  hosts: xwiki
+  tags: nginx
+  become: yes
+  vars:
+    xwiki_domain: "xwiki.{{ inventory_hostname }}"
+    xwiki_port: "8080"
+
+  pre_tasks:
+    - name: "Add options-ssl-nginx.conf to nginx config"
+      copy:
+        src: files/options-ssl-nginx.conf
+        dest: /etc/letsencrypt/options-ssl-nginx.conf 
+    - name: Generate DH params for nginx
+      command: openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048
+      args:
+        creates: /etc/letsencrypt/ssl-dhparams.pem
+    - name: Set secure permissions on ssl-dhparams.pem
+      file:
+        path: /etc/letsencrypt/ssl-dhparams.pem
+        owner: root
+        group: root
+        mode: '0600'
+      become: yes
+
+
+  roles:
+    - role: geerlingguy.nginx
+      nginx_vhosts:
+        - server_name: "{{ xwiki_domain }}"
+          root: "/var/www/"
+          index: "index.php index.html index.htm"
+          template: "{{ playbook_dir }}/templates/xwiki_nginx.j2"
+          
+    
+    
+
+
+
+
+
+
+
+
+

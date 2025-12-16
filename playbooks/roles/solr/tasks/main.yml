@@ -1,0 +1,79 @@
+#SPDX-License-Identifier: MIT-0
+# tasks file for solr
+---
+- name: Ensure Java (OpenJDK) is installed
+  apt:
+    name: openjdk-17-jre-headless
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Add XWiki GPG key
+  apt_key:
+    url: "{{ xwiki_repo_key_url }}"
+    state: present
+
+- name: Add XWiki APT repository
+  apt_repository:
+    repo: "{{ xwiki_repo_url }}"
+    state: present
+    update_cache: yes
+
+- name: Download Solr tarball
+  get_url:
+    url: "{{ solr_download_url }}"
+    dest: "/tmp/solr-{{ solr_version }}.tgz"
+    mode: "0644"
+  become: yes
+
+- name: Extract Solr install script
+  command: >
+    tar xzf solr-{{ solr_version }}.tgz
+    solr-{{ solr_version }}/bin/install_solr_service.sh
+    --strip-components=2
+  args:
+    chdir: /tmp
+    creates: "/tmp/install_solr_service.sh"
+  become: yes
+
+- name: Run Solr install script (systemd service)
+  command: "bash ./install_solr_service.sh solr-{{ solr_version }}.tgz"
+  args:
+    chdir: /tmp
+    creates: /opt/solr
+  become: yes
+
+- name: set user and group for /opt/solr
+  file:
+    path: /opt/solr
+    state: directory
+    owner: solr
+    group: solr
+    recurse: yes
+    mode: '0755'
+  become: yes
+
+- name: Ensure solr user has correct limits and config
+  template:
+    src: solr.in.sh.j2
+    dest: /etc/default/solr.in.sh
+    owner: "{{ solr_user }}"
+    group: "{{ solr_group }}"
+    mode: "0644"
+  notify: restart solr
+  become: yes
+
+- name: Ensure Solr service is enabled and started
+  systemd:
+    name: solr
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Install XWiki Solr core packages (optional, на Solr-сервере)
+  apt:
+    name: "{{ xwiki_solr_packages }}"
+    state: present
+    update_cache: yes
+  when: xwiki_solr_packages | length > 0
+  become: yes

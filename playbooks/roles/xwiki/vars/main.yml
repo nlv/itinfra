@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for xwiki
+xwiki_keyring_path: "/usr/share/keyrings/xwiki-keyring.gpg"
+xwiki_repo_key_url: "https://maven.xwiki.org/xwiki-keyring.gpg"
+xwiki_repo_url: "deb https://maven.xwiki.org stable/"
+xwiki_package: "xwiki-tomcat10-common"

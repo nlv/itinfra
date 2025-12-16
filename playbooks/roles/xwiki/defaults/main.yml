@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for xwiki
+
+xwiki_mariadb_host: "mariadb.example.com"
+xwiki_mariadb_port: 3306
+xwiki_mariadb_database: "xwiki"
+xwiki_mariadb_user: "xwiki"
+xwiki_mariadb_password: "secure_password"
+
+xwiki_solr_host: "solr.example.com"
+xwiki_solr_port: 8983
+xwiki_solr_core: "xwiki"

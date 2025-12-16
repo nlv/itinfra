@@ -1,0 +1,69 @@
+#SPDX-License-Identifier: MIT-0
+
+# tasks file for xwiki 
+---
+- name: Add XWiki GPG key
+  apt_key:
+    url: "{{ xwiki_repo_key_url }}"
+    state: present
+
+- name: Add XWiki APT repository
+  apt_repository:
+    repo: "{{ xwiki_repo_url }}"
+    state: present
+    update_cache: yes
+
+- name: Install XWiki Tomcat10-common package
+  apt:
+    name: "{{ xwiki_package }}"
+    state: present
+    update_cache: yes
+
+- name: Install libmariadb-java
+  apt:
+    name: libmariadb-java
+    state: present
+    update_cache: yes
+
+- name: Ensure Tomcat10 service is started and enabled
+  systemd:
+    name: tomcat10
+    state: started
+    enabled: yes
+
+- name: Configure hibernate.cfg.xml for remote MariaDB
+  template:
+    src: hibernate.cfg.xml.j2
+    dest: /etc/xwiki/hibernate.cfg.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart tomcat10
+
+- name: Configure xwiki.cfg for remote Solr and MariaDB
+  lineinfile:
+    path: /etc/xwiki/xwiki.cfg
+    regexp: 'xwiki.db.{{ item.key }}'
+    line: "xwiki.db.{{ item.key }}={{ item.value }}"
+  loop:
+    - { key: 'url', value: "jdbc:mariadb://{{ xwiki_mariadb_host }}:{{ xwiki_mariadb_port }}/{{ xwiki_mariadb_database }}" }
+    - { key: 'user', value: "{{ xwiki_mariadb_user }}" }
+    - { key: 'password', value: "{{ xwiki_mariadb_password }}" }
+    - { key: 'driver', value: 'org.mariadb.jdbc.Driver' }
+  notify: restart tomcat10
+
+- name: Configure Solr in xwiki.properties
+  lineinfile:
+    path: /etc/xwiki/xwiki.properties
+    regexp: '{{ item.regexp }}'
+    line: '{{ item.line }}'
+  loop:
+    - { regexp: '^solr\.solr\.home.*', line: 'solr.solr.home=http://{{ xwiki_solr_host }}:{{ xwiki_solr_port }}/solr/{{ xwiki_solr_core }}' }
+    - { regexp: '^solr\.embedded\.indexing=.*', line: 'solr.embedded.indexing=false' }
+  notify: restart tomcat10
+
+- name: Open firewall for Tomcat
+  ufw:
+    rule: allow
+    port: 8080
+    proto: tcp

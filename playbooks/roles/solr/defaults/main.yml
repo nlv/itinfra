@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+# defaults file for solr
+---
+solr_version: "9.10.0"
+solr_download_url: "https://dlcdn.apache.org/solr/solr/{{ solr_version }}/solr-{{ solr_version }}.tgz"
+
+solr_user: solr
+solr_group: solr
+solr_port: 8983
+
+xwiki_solr_packages: [ "xwiki-solr9-all" ]

@@ -1,0 +1,8 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for xwiki
+
+- name: restart tomcat10
+  systemd:
+    name: tomcat10
+    state: restarted

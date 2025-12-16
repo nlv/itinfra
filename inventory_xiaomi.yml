@@ -1,0 +1,15 @@
+db:
+  hosts:
+    nlvomskxiaomi.ru:
+      ansible_user: root
+
+solr:
+  hosts:
+    nlvomskxiaomi.ru:
+      ansible_user: root
+
+xwiki:
+  hosts:
+    nlvomskxiaomi.ru:
+      ansible_user: root
+
